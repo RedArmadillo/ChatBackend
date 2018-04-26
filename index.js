@@ -18,12 +18,12 @@ pgp.pg.defaults.ssl = true;
 //Create connection to Heroku Database
 let db;
 //Uncomment next line and change the string to your DATABASE_URL
-//db = pgp('<SET ME TO Result of `heroku config:get DATABASE_URL -a tcss450`');
+db = pgp('postgres://kqnectjlqliwgi:a2cd02769684b7fd4796b06330f182a0a770b0a6461e1403856a6ea7f51d2bee@ec2-174-129-41-64.compute-1.amazonaws.com:5432/d4g7n5qat2vqu5');
 
-//if(!db) {
-//    console.log("SHAME! Follow the intructions and set your DATABASE_URL correctly");
-//    process.exit(1);
-//}
+if(!db) {
+    console.log("SHAME! Follow the intructions and set your DATABASE_URL correctly");
+    process.exit(1);
+}
 
 
 /**
@@ -75,6 +75,74 @@ app.post("/hello", (req, res) => {
     });
 });
 
+app.get("/params", (req, res) => {
+    res.send({
+        //req.query is a reference to arguments in the url
+        message: "Hello, " + req.query['name'] + "!"
+    });
+});
+
+app.post("/params", (req, res) => {
+
+    res.send({
+        //req.query is a reference to arguments in the POST body
+        message: "Hello, " + req.body['name'] + "! You sent a POST Request"
+    });
+});
+
+app.get("/wait", (req, res) => {
+    setTimeout(() => {
+        res.send({
+            message: "Thanks for waiting"
+        });
+    }, 1000);
+});
+
+app.post("/demosql", (req, res) => {
+    var name = req.body['name'];
+
+    if (name) {
+        let params = [name];
+        db.none("INSERT INTO DEMO(Text) VALUES ($1)", params)
+        .then(() => {
+            //We successfully added the name, let the user know
+            res.send({
+                success: true
+            });
+        }).catch((err) => {
+            //log the error
+            console.log(err);
+            res.send({
+                success: false,
+                error: err
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            error: "Missing required information"
+        });
+    }
+});
+
+app.get("/demosql", (req, res) => {
+
+    db.manyOrNone('SELECT Text FROM Demo')
+    //If successful, run function passed into .then()
+    .then((data) => {
+        res.send({
+            success: true,
+            names: data
+        });
+    }).catch((error) => {
+        console.log(error);
+        res.send({
+            success: false,
+            error: error
+        })
+    });
+});
 
 
 
