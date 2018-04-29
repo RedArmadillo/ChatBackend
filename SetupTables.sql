@@ -49,8 +49,3 @@ CREATE TABLE Locations (PrimaryKey SERIAL PRIMARY KEY,
                         ZIP INT,
                         FOREIGN KEY(MemberID) REFERENCES Members(MemberID)
 );
-
-DROP TABLE IF EXISTS Demo;
-CREATE TABLE Demo (DemoID SERIAL PRIMARY KEY,
-                        Text VARCHAR(255)
-);

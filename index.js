@@ -10,21 +10,12 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 //We use this create the SHA256 hash
 const crypto = require("crypto");
-//pg-promise is a postgres library that uses javascript promises
-const pgp = require('pg-promise')();
-//We have to set ssl usage to true for Heroku to accept our connection
-pgp.pg.defaults.ssl = true;
 
-//Create connection to Heroku Database
-let db;
-//Uncomment next line and change the string to your DATABASE_URL
-db = pgp('postgres://kqnectjlqliwgi:a2cd02769684b7fd4796b06330f182a0a770b0a6461e1403856a6ea7f51d2bee@ec2-174-129-41-64.compute-1.amazonaws.com:5432/d4g7n5qat2vqu5');
+var login = require('./routes/login.js');
+app.use('/login', login);
 
-if(!db) {
-    console.log("SHAME! Follow the intructions and set your DATABASE_URL correctly");
-    process.exit(1);
-}
-
+var reg = require('./routes/register.js');
+app.use('/register', reg);
 
 /**
  * Method to get a salted hash.
@@ -35,116 +26,6 @@ if(!db) {
 function getHash(pw, salt) {
     return crypto.createHash("sha256").update(pw + salt).digest("hex");
 }
-
-
-function sendEmail(from, to, subject, message) {
-    let form = new FormData();
-    form.append("from", from);
-    form.append("to", to);
-    form.append("subject", subject);
-    form.append("message", message);
-    form.submit("http://cssgate.insttech.washington.edu/~cfb3/mail.php", (err, res) => {
-        if(err) console.error(err);
-        console.log(res);
-    });
-}
-
-
-//app.get('/users') means accept http 'GET' requests at path '/users'
-app.post('/login', (req, res) => {
-});
-
-
-//app.post('/register') means accept http 'POST' requests at path "/release"
-app.post("/register", (req, res) => {  
-});
-
-/*
- * Hello world functions below...
- */
-app.get("/hello", (req, res) => {
-    res.send({
-        message: "Hello, you sent a GET request"
-    });
-});
-
-
-app.post("/hello", (req, res) => {
-    res.send({
-        message: "Hello, you sent a POST request"
-    });
-});
-
-app.get("/params", (req, res) => {
-    res.send({
-        //req.query is a reference to arguments in the url
-        message: "Hello, " + req.query['name'] + "!"
-    });
-});
-
-app.post("/params", (req, res) => {
-
-    res.send({
-        //req.query is a reference to arguments in the POST body
-        message: "Hello, " + req.body['name'] + "! You sent a POST Request"
-    });
-});
-
-app.get("/wait", (req, res) => {
-    setTimeout(() => {
-        res.send({
-            message: "Thanks for waiting"
-        });
-    }, 1000);
-});
-
-app.post("/demosql", (req, res) => {
-    var name = req.body['name'];
-
-    if (name) {
-        let params = [name];
-        db.none("INSERT INTO DEMO(Text) VALUES ($1)", params)
-        .then(() => {
-            //We successfully added the name, let the user know
-            res.send({
-                success: true
-            });
-        }).catch((err) => {
-            //log the error
-            console.log(err);
-            res.send({
-                success: false,
-                error: err
-            });
-        });
-    } else {
-        res.send({
-            success: false,
-            input: req.body,
-            error: "Missing required information"
-        });
-    }
-});
-
-app.get("/demosql", (req, res) => {
-
-    db.manyOrNone('SELECT Text FROM Demo')
-    //If successful, run function passed into .then()
-    .then((data) => {
-        res.send({
-            success: true,
-            names: data
-        });
-    }).catch((error) => {
-        console.log(error);
-        res.send({
-            success: false,
-            error: error
-        })
-    });
-});
-
-
 
 /*
  * Return HTML for the / end point. 
