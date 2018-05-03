@@ -14,8 +14,7 @@ function verify_account (username, email) {
         from: "Team 7 <no-reply@gmail.com>",
         to: username + " <" + email + ">",
         subject: "Please verify your RedArmadillo account",
-        text: "This email is to inform you that you have succesfully registered for RedArmadillo\
-        chat service. If this email was sent in error, please ignore it."
+        text: "This email is to inform you that you have succesfully registered for RedArmadillo chat service. If this email was sent in error, please ignore it."
     }
 
     smtpTransport.sendMail(mailOptions, function(error, response) {
