@@ -1,5 +1,6 @@
 let nodemailer = require("nodemailer");
 let db = require('../utilities/utils').db;
+let base_url = require('../utilities/utils').base_url;
 
 function verify_account (username, email, secret) {
 
@@ -20,7 +21,7 @@ function verify_account (username, email, secret) {
         to: username + " <" + email + ">",
         subject: "Please verify your RedArmadillo account",
         text: "This email is to inform you that you have succesfully registered for RedArmadillo chat service. If this email was sent in error, please ignore it.\
-To verify this account, visit " + utils.base_url + "verify/" + secret 
+To verify this account, visit " + base_url + "verify/" + secret 
     }
 
     smtpTransport.sendMail(mailOptions, function(error, response) {
