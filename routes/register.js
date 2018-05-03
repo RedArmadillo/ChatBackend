@@ -10,7 +10,7 @@ const crypto = require("crypto");
 //Create connection to Heroku Database
 let db = require('../utilities/utils').db;
 let getHash = require('../utilities/utils').getHash;
-let sendEmail = require('../utilities/utils').sendEmail;
+let sendVerification = require('../utilities/send_verification');
 var router = express.Router();
 router.post('/', (req, res) => {
     res.type("application/json");
@@ -36,10 +36,11 @@ router.post('/', (req, res) => {
         db.none("INSERT INTO MEMBERS(FirstName, LastName, Username, Email, Password, Salt) VALUES ($1, $2, $3, $4, $5, $6)", params)
         .then(() => {
             //We successfully added the user, let the user know
+            sendVerification(username, email);
             res.send({
                 success: true
             });
-            sendEmail("cfb3@uw.edu", email, "Welcome!", "<strong>Welcome to our app!</strong>");
+
         }).catch((err) => {
             //log the error
             console.log(err);
