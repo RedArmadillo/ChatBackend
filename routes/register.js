@@ -11,6 +11,7 @@ const crypto = require("crypto");
 let db = require('../utilities/utils').db;
 let getHash = require('../utilities/utils').getHash;
 let sendVerification = require('../utilities/send_verification');
+let generateSecret = require('../utilities/utils').generateSecret;
 var router = express.Router();
 router.post('/', (req, res) => {
     res.type("application/json");
