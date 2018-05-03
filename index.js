@@ -17,6 +17,9 @@ app.use('/login', login);
 var reg = require('./routes/register.js');
 app.use('/register', reg);
 
+let verify = require('./routes/verify_account.js');
+app.use('/verify', verify);
+
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency

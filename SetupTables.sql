@@ -1,12 +1,20 @@
-DROP TABLE IF EXISTS Members;
+DROP TABLE IF EXISTS Members CASCADE;
 CREATE TABLE Members (MemberID SERIAL PRIMARY KEY,
                       FirstName VARCHAR(255) NOT NULL,
 		              LastName VARCHAR(255) NOT NULL,
                       Username VARCHAR(255) NOT NULL UNIQUE,
                       Email VARCHAR(255) NOT NULL UNIQUE,
                       Password VARCHAR(255) NOT NULL,
-                      SALT VARCHAR(255),
-                      Verification INT DEFAULT 0
+                      SALT VARCHAR(255)
+);
+
+DROP TABLE IF EXISTS Verification;
+CREATE TABLE Verification (
+                      SecretID SERIAL PRIMARY KEY,
+                      Username VARCHAR(255) NOT NULL UNIQUE,
+                      Secret VARCHAR(32),
+                      Verified BOOLEAN DEFAULT FALSE,
+                      Created TIMESTAMPTZ NOT NULL DEFAULT Now()
 );
 
 DROP TABLE IF EXISTS Contacts;
@@ -18,7 +26,7 @@ CREATE TABLE Contacts(PrimaryKey SERIAL PRIMARY KEY,
                       FOREIGN KEY(MemberID_B) REFERENCES Members(MemberID)
 );
 
-DROP TABLE IF EXISTS Chats;
+DROP TABLE IF EXISTS Chats CASCADE;
 CREATE TABLE Chats (ChatID SERIAL PRIMARY KEY,
                     Name VARCHAR(255)
 );

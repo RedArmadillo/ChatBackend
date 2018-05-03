@@ -23,11 +23,38 @@ router.post('/', (req, res) => {
             let salt = row['salt'];
             let ourSaltedHash = row['password']; //Retrieve our copy of the password
             let theirSaltedHash = getHash(theirPw, salt); //Combined theirpassword with our salt, then hash
-            let wasCorrectPw = ourSaltedHash === theirSaltedHash; //Did oursalted hash match their salted hash?
+            let isCorrectPw = ourSaltedHash === theirSaltedHash; //Did oursalted hash match their salted hash?
             //Send whether they had the correct password or not
-            res.send({
-                success: wasCorrectPw
-            });
+
+            if (isCorrectPw) {
+
+                db.one("SELECT Verified FROM Verification WHERE Username=$1", [user])
+                .then(row => {
+                    let isVerified = row["verified"];
+                    if (isVerified) {
+                        res.send({
+                            success:isCorrectPw && isVerified,
+                            message: "login successful"
+                        })
+                    } else {
+                        res.send({
+                            success: isVerified,
+                            message: "account not verified"
+                        })
+                    }
+                })
+                .catch()
+
+                res.send({
+                    success: isCorrectPw
+                });
+            } else {
+                res.send({
+                    success: isCorrectPw,
+                    message: "incorrect password"
+                })
+            }
+            
         })
         //More than one row shouldn't be found, since table has constraint on it
         .catch((err) => {

@@ -22,9 +22,17 @@ function sendEmail(from, to, subject, message) {
 * @param {string} salt the salt to use when hashing
 */
 function getHash(pw, salt) {
- return crypto.createHash("sha256").update(pw + salt).digest("hex");
+    return crypto.createHash("sha256").update(pw + salt).digest("hex");
 }
 
+function generateSecret() {
+    let random_bytes = crypto.randomBytes(32).toString("hex");
+    return getHash(random_bytes);
+}
+
+base_url = "https://group7-chatapp.herokuapp.com/";
+
+
 module.exports = {
- db, getHash, sendEmail
+ db, getHash, sendEmail, generateSecret, base_url
 };
