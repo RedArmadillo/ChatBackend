@@ -37,7 +37,7 @@ router.post('/', (req, res) => {
         .then(() => {
             //We successfully added the user, let the user know
             let secret = utils.generateSecret();
-            db.none("INSERT INTO Verification()") // TODO 
+            // db.none("INSERT INTO Verification()") // TODO 
             sendVerification(username, email, secret);
             res.send({
                 success: true
