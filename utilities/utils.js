@@ -27,7 +27,8 @@ function getHash(pw, salt) {
 
 function generateSecret() {
     let random_bytes = crypto.randomBytes(32).toString("hex");
-    return getHash(random_bytes);
+    let hash = getHash(random_bytes);
+    return hash.substring(0, 32);
 }
 
 base_url = "https://group7-chatapp.herokuapp.com/";
