@@ -28,7 +28,7 @@ router.post('/', (req, res) => {
 
             if (isCorrectPw) {
 
-                db.one("SELECT Verified FROM Verification WHERE Username=$1", [user])
+                db.one("SELECT Verified FROM Members WHERE Username=$1", [user])
                 .then(row => {
                     let isVerified = row["verified"];
                     if (isVerified) {
