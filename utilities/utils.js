@@ -31,7 +31,8 @@ function generateSecret() {
     return hash.substring(0, 32);
 }
 
-base_url = "https://group7-chatapp.herokuapp.com/";
+// base_url = "https://group7-chatapp.herokuapp.com/";
+base_url = process.env.BASE_URL;
 
 
 module.exports = {

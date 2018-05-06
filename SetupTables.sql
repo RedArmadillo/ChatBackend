@@ -5,17 +5,13 @@ CREATE TABLE Members (MemberID SERIAL PRIMARY KEY,
                       Username VARCHAR(255) NOT NULL UNIQUE,
                       Email VARCHAR(255) NOT NULL UNIQUE,
                       Password VARCHAR(255) NOT NULL,
-                      SALT VARCHAR(255)
-);
-
-DROP TABLE IF EXISTS Verification;
-CREATE TABLE Verification (
-                      SecretID SERIAL PRIMARY KEY,
-                      Username VARCHAR(255) NOT NULL UNIQUE,
+                      SALT VARCHAR(255),
                       Secret VARCHAR(32),
                       Verified BOOLEAN DEFAULT FALSE,
                       Created TIMESTAMPTZ NOT NULL DEFAULT Now()
 );
+
+DROP TABLE IF EXISTS Verification;
 
 DROP TABLE IF EXISTS Contacts;
 CREATE TABLE Contacts(PrimaryKey SERIAL PRIMARY KEY,

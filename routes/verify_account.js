@@ -9,17 +9,15 @@ let db = require('../utilities/utils').db;
 // let getHash = require('../utilities/utils').getHash;
 var router = express.Router();
 
-router.post('/', (req, res) => {
+router.get('/', (req, res) => {
     let secret = req.param("secret");
     if(secret) {
         //Using the 'one' method means that only one row should be returned
-        db.one("SELECT Verified, Created FROM Verification WHERE Secret=$1 AND Created >= now() - INTERVAL '2 DAYS'", [secret])
+        db.one("SELECT Verified, Created FROM Members WHERE Secret=$1 AND Created >= now() - INTERVAL '1 DAY'", [secret])
         //If successful, run function passed into .then()
         .then(row => {
-            db.none("UPDATE Verification SET Verified = TRUE WHERE Secret=$1", [secret]);
-            res.send({
-                success: true
-            })
+            db.none("UPDATE Members SET Verified = TRUE WHERE Secret=$1", [secret]);
+            res.send("<h2>Success! :)</h2><p>Thanks for verifying your account.</p>")
         })
         //More than one row shouldn't be found, since table has constraint on it
         .catch((err) => {

@@ -4,8 +4,8 @@ let base_url = require('../utilities/utils').base_url;
 
 function verify_account (username, email, secret) {
 
-    verify_params = [username, secret];
-    db.none("INSERT INTO Verification(Username, Secret) VALUES ($1, $2)", verify_params)
+    verify_params = [secret];
+    db.none("UPDATE Members SET Secret=$1", verify_params)
     .catch(err => {console.log(err)})
 
     let smtpTransport = nodemailer.createTransport({
