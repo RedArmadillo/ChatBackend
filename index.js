@@ -20,15 +20,15 @@ app.use('/register', reg);
 let verify = require('./routes/verify_account.js');
 app.use('/verify', verify);
 
-let messages = require('./routes/messages.js');
-app.use('/', messages);
-
 var newRoom = require('./routes/create_chat_room.js');
 app.use('/createRoom', newRoom);
 var getRooms = require('./routes/get_chat_room.js');
 app.use('/getRooms', getRooms);
 var userid = require('./routes/memberid.js');
 app.use('/getMemberid', userid);
+
+let messages = require('./routes/messages.js');
+app.use('/', messages);
 
 /**
  * Method to get a salted hash.
