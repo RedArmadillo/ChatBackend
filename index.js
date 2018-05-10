@@ -20,6 +20,9 @@ app.use('/register', reg);
 let verify = require('./routes/verify_account.js');
 app.use('/verify', verify);
 
+let reverify = require('./routes/reverify.js');
+app.use('/reverify', reverify);
+
 let messages = require('./routes/messages.js');
 app.use('/', messages);
 
