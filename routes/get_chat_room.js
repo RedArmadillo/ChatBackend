@@ -12,6 +12,7 @@ let temp;
 router.get("/", (req, res) => {
     let name = req.query['username'];
  
+    /*
     let query = `select chatid, message
     from messages m
     where memberid = (select memberid from members where username = $1)
@@ -19,6 +20,7 @@ router.get("/", (req, res) => {
                     from messages
                     where messages.chatid = m.chatid)
                     order by timestamp DESC`;
+                    */
     let secondQuery = `select c.chatid, m.message, r.name
     from chatmembers c left join messages m on (m.chatid = c.chatid) left join chats r on m.chatid = r.chatid
     where c.memberid = (select memberid from members where username=$1)
