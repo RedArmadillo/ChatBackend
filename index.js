@@ -24,7 +24,7 @@ let messages = require('./routes/messages.js');
 app.use('/', messages);
 
 var newRoom = require('./routes/create_chat_room.js');
-app.use('/createRoom', id);
+app.use('/createRoom', newRoom);
 var getRooms = require('./routes/get_chat_room.js');
 app.use('/getRooms', getRooms);
 var userid = require('./routes/memberid.js');
