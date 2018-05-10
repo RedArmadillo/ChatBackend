@@ -13,9 +13,7 @@ router.post("/", (req, res) => {
     let name = req.body['room name'];
     let uname = req.body['username'];
     let insertNewRoom = 'insert into chats(name) values ($1) returning chatid';
-    let secondQuery =  `INSERT INTO Messages(ChatId, Message, MemberId)
-    SELECT $1, $2, MemberId FROM Members 
-    WHERE Username=$3;`;
+
     let insertWelcomMessage = `INSERT INTO Messages(ChatId, Message, MemberId)
     SELECT $1, $2, MemberId FROM Members 
     WHERE Username=$3`;
