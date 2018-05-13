@@ -1,5 +1,4 @@
 const express = require('express');
-const app = express();
 const bodyParser = require("body-parser");
 
 let db = require('../utilities/utils').db;

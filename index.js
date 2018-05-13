@@ -1,6 +1,5 @@
 //express is the framework we're going to use to handle requests
 const express = require('express');
-//Create a new instance of express
 const app = express();
 
 const FormData = require("form-data");
@@ -38,6 +37,11 @@ app.use('/', messages);
 let chatRoom = require('./routes/chat_room.js');
 app.use('/chatRoom', chatRoom);
 
+let invitation = require('./routes/room_invitation.js');
+app.use('/roomInvitation', invitation);
+
+let decline = require('./routes/decline_inv.js');
+app.use('/declineInvitation', decline);
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency
