@@ -22,12 +22,6 @@ app.use('/verify', verify);
 let reverify = require('./routes/reverify.js');
 app.use('/reverify', reverify);
 
-var newRoom = require('./routes/create_chat_room.js');
-app.use('/createRoom', newRoom);
-
-var getRooms = require('./routes/get_chat_room.js');
-app.use('/getRooms', getRooms);
-
 var userid = require('./routes/memberid.js');
 app.use('/getMemberid', userid);
 
