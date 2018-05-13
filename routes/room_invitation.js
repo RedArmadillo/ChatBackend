@@ -39,12 +39,14 @@ router.post("/", (req, res) => {
     let receiver = req.body['receiver'];
     let ID = req.body['chatid'];
 
-    let query = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
-                VALUES
-                ((SELECT MemberId FROM Members WHERE Username = $1),
-                (SELECT MemberId FROM Members WHERE Username = $2),
-                $3)`;
-    db.none(query, [sender, receiver, ID])
+    // let query = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
+    //             VALUES
+    //             ((SELECT MemberId FROM Members WHERE Username = $1),
+    //             (SELECT MemberId FROM Members WHERE Username = $2),
+    //             $3)`;
+    let secondQuery = `INSERT INTO ChatMembers(ChatId, MemberId)
+            VALUES ($1, (SELECT MemberId FROM Members WHERE Username = $2))`;
+    db.none(secondQuery, [ID, receiver])
     .then(() => {
         res.send({
             success: true
