@@ -23,6 +23,9 @@ app.use('/verify', verify);
 let messages = require('./routes/messages.js');
 app.use('/', messages);
 
+let chatRoom = require('./routes/chat_room.js');
+app.use('/chatRoom', chatRoom);
+
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency
