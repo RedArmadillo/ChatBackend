@@ -18,6 +18,17 @@ var router = express.Router();
 
 
 // POST a new contact connection / make a friend request
+/*
+ON SUCCESS:
+success: true
+message: the human-readable message describing the success case, verifying, denying, or sending a new request 
+
+ON FAILURE:
+success: false
+message: human-readable error message
+
+Failure may also return 'input' containing the required fields that were not supplied
+*/
 router.post('/', (req, res) => {
     let username_a = req.body["username_a"];
     let username_b = req.body["username_b"];
@@ -93,13 +104,75 @@ router.post('/', (req, res) => {
                 message: "requesting user does not exist"
             })
         });  
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            error: "Missing required user information"
+        });
     }
 });
 
 
 // GET a contact connection
-router.get('/', (req, res) => {
+/*
+ON SUCCESS:
+success: true
+verified: the list of verified connections returned by the database
+pending: the list of pending connections returned by the database
 
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
+
+Failure may also return 'input' containing the required fields that were not supplied
+*/
+router.get('/', (req, res) => {
+    let username = req.body["username"];
+
+    if (username) {
+        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
+        .then( members_row => {
+            let userid = members_row["MemberID"];
+            db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            .then((verified_rows) => {
+                db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=0", [userid])
+                .then((pending_rows) => {
+                    res.send({
+                        success: true,
+                        verified: verified_rows,
+                        pending: pending_rows
+                    });
+                })
+                .catch((err) => {
+                    res.send({
+                        success: false,
+                        error: err
+                    });
+                });
+            })
+            .catch((err) => {
+                res.send({
+                    success: false,
+                    error: err
+                });
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "No user found by that username",
+                error: err
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            message: "Missing username"
+        });
+    }
 });
 
 
