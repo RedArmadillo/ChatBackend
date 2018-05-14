@@ -44,6 +44,7 @@ router.post("/", (req, res) => {
     //             ((SELECT MemberId FROM Members WHERE Username = $1),
     //             (SELECT MemberId FROM Members WHERE Username = $2),
     //             $3)`;
+    
     let secondQuery = `INSERT INTO ChatMembers(ChatId, MemberId)
             VALUES ($1, (SELECT MemberId FROM Members WHERE Username = $2))`;
     db.none(secondQuery, [ID, receiver])

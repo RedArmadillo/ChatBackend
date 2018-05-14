@@ -69,7 +69,7 @@ router.post("/", (req, res) => {
         console.log(id);
         console.log("inserted into ChatMembers");
         let welcome = "welcome!"
-        db.none(insertWelcomMessage, [id, welcome, uname]);
+        return db.none(insertWelcomMessage, [id, welcome, uname]);
     })
     .then(() => {
         console.log("inserted into Messages");
