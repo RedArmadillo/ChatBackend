@@ -1,14 +1,3 @@
-/*
-DROP TABLE IF EXISTS Contacts;
-CREATE TABLE Contacts(PrimaryKey SERIAL PRIMARY KEY,
-                      MemberID_A INT NOT NULL,
-                      MemberID_B INT NOT NULL,
-                      Verified INT DEFAULT 0,
-                      FOREIGN KEY(MemberID_A) REFERENCES Members(MemberID),
-                      FOREIGN KEY(MemberID_B) REFERENCES Members(MemberID)
-);
-*/
-
 const express = require('express');
 const app = express();
 const bodyParser = require("body-parser");
@@ -178,8 +167,66 @@ router.get('/', (req, res) => {
 
 // UPDATE a contact connection
 // The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
-router.put('/', (req, res) => {
+/*
+ON SUCCESS:
+success: true
+verified: the new verified status
+message: human-readable success case
 
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
+
+Failure may also return 'input' containing the required fields that were not supplied
+*/
+router.put('/', (req, res) => {
+    let username_a = req.body["username_a"];
+    let username_b = req.body["username_b"];
+    let new_status = req.body["new_status"]
+
+    if (username_a && username_b && new_status) {
+        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
+        .then( un_a => {
+            let userid_a = un_a["MemberID"];
+            db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
+            .then( un_b => {
+                let userid_b = un_b["MemberID"];
+                let params = [userid_a, userid_b, new_status];
+                db.none("UPDATE Contacts SET Verified=$3 WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
+                .then(() => {
+                    res.send({
+                        success: true,
+                        message: "status updated"
+                    });
+                })
+                .catch((err) => {
+                    res.send({
+                        success:false,
+                        error:err
+                    });
+                });
+            })
+            .catch((err) => {
+                res.send({
+                    success:false,
+                    error:err
+                })
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success:false,
+                error:err
+            })
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            message: "Missing username"
+        })
+    }
 });
 
 module.exports = router;
