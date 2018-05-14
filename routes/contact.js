@@ -30,8 +30,9 @@ router.post('/', (req, res) => {
         .then( row1 => {
             db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
             .then( row2 => {
-                let memberID_a = row1["MemberID"];
-                let memberID_b = row2["MemberID"];
+                console.log(row1);
+                let memberID_a = row1["memberid"];
+                let memberID_b = row2["memberid"];
                 let params = [memberID_a, memberID_b];
 
                 // first let's check if user B already sent user A a request
@@ -118,12 +119,12 @@ error: error trace
 Failure may also return 'input' containing the required fields that were not supplied
 */
 router.get('/', (req, res) => {
-    let username = req.body["username"];
+    let username = req.param("username");
 
     if (username) {
         db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
         .then( members_row => {
-            let userid = members_row["MemberID"];
+            let userid = members_row["memberid"];
             db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
             .then((verified_rows) => {
                 db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=0", [userid])
@@ -188,10 +189,10 @@ router.put('/', (req, res) => {
     if (username_a && username_b && new_status) {
         db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
         .then( un_a => {
-            let userid_a = un_a["MemberID"];
+            let userid_a = un_a["memberid"];
             db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
             .then( un_b => {
-                let userid_b = un_b["MemberID"];
+                let userid_b = un_b["memberid"];
                 let params = [userid_a, userid_b, new_status];
                 db.none("UPDATE Contacts SET Verified=$3 WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
                 .then(() => {
