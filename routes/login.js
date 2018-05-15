@@ -44,10 +44,6 @@ router.post('/', (req, res) => {
                     }
                 })
                 .catch()
-
-                res.send({
-                    success: isCorrectPw
-                });
             } else {
                 res.send({
                     success: isCorrectPw,
@@ -61,7 +57,7 @@ router.post('/', (req, res) => {
             //If anything happened, it wasn't successful
             res.send({
                 success: false,
-                message: err
+                message: "username not found"
             });
         });
         } else {
