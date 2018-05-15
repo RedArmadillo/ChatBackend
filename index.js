@@ -25,6 +25,9 @@ app.use('/reverify', reverify);
 var userid = require('./routes/memberid.js');
 app.use('/getMemberid', userid);
 
+var contacts = require('./routes/contact.js');
+app.use('/contacts', contacts);
+
 let messages = require('./routes/messages.js');
 app.use('/', messages);
 
