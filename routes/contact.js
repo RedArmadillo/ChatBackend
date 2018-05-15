@@ -201,7 +201,6 @@ router.get('/:username/', (req, res) => {
                 .then((outgoing_rows) => {
                     db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_B=$1 AND Verified=0", [userid])
                     .then((incoming_rows) => {
-
                         res.send({
                             success: true,
                             verified: verified_rows,
