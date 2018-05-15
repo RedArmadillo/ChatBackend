@@ -61,4 +61,6 @@ router.post("/", (req, res) => {
     });
 });
 
+// Service to accept to an invitation
+
 module.exports = router;
