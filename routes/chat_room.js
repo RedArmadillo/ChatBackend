@@ -77,7 +77,27 @@ router.post("/", (req, res) => {
     .catch((err) => {
         res.send({
             success: false,
-            error: err,
+            error: err
+        });
+    }); 
+});
+
+// service to leave a room
+router.post('/leave', (req, res) =>{
+    let userid = req.body['memberid'];
+    let roomid = req.body['chatid'];
+ 
+    db.none("delete from chatmembers c where c.memberid = $1 and c.chatid = $2", [userid, roomid])
+    .then(()=>{
+        res.send({
+            success : true,
+            message : "leaving the room..."
+        });
+    })
+    .catch((err) => {
+        res.send({
+            success: false,
+            message: "cannot leave room"
         });
     }); 
 });
