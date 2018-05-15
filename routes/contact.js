@@ -197,12 +197,17 @@ router.get('/:username/', (req, res) => {
             let userid = members_row["memberid"];
             db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
             .then((verified_rows) => {
-                db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=0", [userid])
-                .then((pending_rows) => {
-                    res.send({
-                        success: true,
-                        verified: verified_rows,
-                        pending: pending_rows
+                db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_A=$1 AND Verified=0", [userid])
+                .then((outgoing_rows) => {
+                    db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_B=$1 AND Verified=0", [userid])
+                    .then((incoming_rows) => {
+
+                        res.send({
+                            success: true,
+                            verified: verified_rows,
+                            outgoing: outgoing_rows,
+                            incoming: incoming_rows
+                        });
                     });
                 })
                 .catch((err) => {

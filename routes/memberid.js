@@ -8,7 +8,7 @@ let db = require('../utilities/utils').db;
 var router = express.Router();
 router.use(bodyParser.json());
 
-router.post("/", (req, res) => {
+router.get("/", (req, res) => {
     let name = req.body['username'];
 
     db.one('select memberid from members where username = $1', [name])
