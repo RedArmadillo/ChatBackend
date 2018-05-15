@@ -44,10 +44,6 @@ router.post('/', (req, res) => {
                     }
                 })
                 .catch()
-
-                res.send({
-                    success: isCorrectPw
-                });
             } else {
                 res.send({
                     success: isCorrectPw,
