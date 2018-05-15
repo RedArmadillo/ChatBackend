@@ -5,106 +5,155 @@ app.use(bodyParser.json());
 let db = require('../utilities/utils').db;
 var router = express.Router();
 
-
-// POST a new contact connection / make a friend request
 /*
-ON SUCCESS:
-success: true
-message: the human-readable message describing the success case, verifying, denying, or sending a new request 
-
-ON FAILURE:
-success: false
-message: human-readable error message
-
-Failure may also return 'input' containing the required fields that were not supplied
+Accept a new friend request. Joy.
 */
-router.post('/', (req, res) => {
-    let username_a = req.body["username_a"];
+router.post('/:username_a/accept/', (req, res) => {
+    let username_a = req.param["username_a"];
     let username_b = req.body["username_b"];
-    let accepted = req.body["accepted"];
 
-    if (username_a && username_b && accepted != null) {
+    if (username_a && username_b) {
 
         // check to make sure both users exist
-        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
-        .then( row1 => {
-            db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
-            .then( row2 => {
-                console.log(row1);
-                let memberID_a = row1["memberid"];
-                let memberID_b = row2["memberid"];
-                let params = [memberID_a, memberID_b];
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        .then( (rows) => {
+            let memberIDs = rows["memberid"];
+            let usernames = rows["username"];
 
-                // first let's check if user B already sent user A a request
-                db.oneOrNone("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_A=$2 AND MemberID_B=$1", params)
-                .then((row3) => {
+            let memberID_a = memberIDs[usernames.indexOf(username_a)];
+            let memberID_b = memberIDs[usernames.indexOf(username_b)];
 
-                    // request accepted
-                    if (row3 && accepted) {
+            let params = [memberID_a, memberID_b];
 
-                        // What luck, the other user already sent a request
-                        db.none("UPDATE Contacts SET Verified=1 WHERE MemberID_A=$2 AND MemberID_B=$1", params).then(() => {
-                            res.send({
-                                success: true,
-                                message: "contacts verified, friend request accepted"
-                            });
-                        });
+            // Let's check if user B already sent user A a request
+            db.one("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_A=$2 AND MemberID_B=$1", params)
+            .then( (verify_rows) => {
 
-                    // request denied
-                    } else if(row3 && !accepted) {
-                        db.none("UPDATE Contacts SET Verified=-1 WHERE MemberID_A=$2 AND MemberID_B=$1", params).then(() => {
-                            res.send({
-                                success: true,
-                                message: "friend request rejected"
-                            });
-                        });
-                    
-                    // Create the new request
-                    } else {
-                        db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
-                        .then(
-                            res.send({
-                                success: true,
-                                message: "friend request sent"
-                            })
-                        )
-                        .catch((err) => {
-                            res.send({
-                                success: false,
-                                message: err
-                            });
-                        });
-                    }
+                db.none("UPDATE Contacts SET Verified=1 WHERE MemberID_A=$2 AND MemberID_B=$1", params).then(() => {
+                    res.send({
+                        success: true,
+                        message: "contacts verified, friend request accepted"
+                    });
                 });
             })
-
-            // Member B does not exist
-            .catch(err => {
+            .catch((err) => {
                 res.send({
                     success: false,
-                    message: "the username you are requesting to connect with does not exist"
-                })
+                    message: "user b hasn't sent a request to user a"
+                });
             });
         })
-
-        // Member A does not exist
-        .catch(err => {
+        .catch((err) => {
             res.send({
                 success: false,
-                message: "requesting user does not exist"
-            })
-        });  
+                message: "one of the usernames does not exist"
+            });
+        });
     } else {
         res.send({
             success: false,
-            input: req.body,
-            error: "Missing required user information"
+            message: "missing required information"
+        });
+    }
+
+});
+
+/*
+Reject a friend request. Womp womp.
+*/
+router.post('/:username_a/reject/', (req, res) => {
+    let username_a = req.param["username_a"];
+    let username_b = req.body["username_b"];
+
+    if (username_a && username_b) {
+
+        // check to make sure both users exist
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        .then( (rows) => {
+            let memberIDs = rows["memberid"];
+            let usernames = rows["username"];
+
+            let memberID_a = memberIDs[usernames.indexOf(username_a)];
+            let memberID_b = memberIDs[usernames.indexOf(username_b)];
+
+            let params = [memberID_a, memberID_b];
+
+            // Let's check if user B already sent user A a request
+            db.one("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_A=$2 AND MemberID_B=$1", params)
+            .then( (verify_rows) => {
+
+                db.none("UPDATE Contacts SET Verified=-1 WHERE MemberID_A=$2 AND MemberID_B=$1", params).then(() => {
+                    res.send({
+                        success: true,
+                        message: "contact request rejected"
+                    });
+                });
+            })
+            .catch((err) => {
+                res.send({
+                    success: false,
+                    message: "user b hasn't sent a request to user a"
+                });
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "one of the usernames does not exist"
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            message: "missing required information"
+        });
+    }
+
+});
+
+/*
+Request friendship. Yay.
+*/
+router.post('/:username_a/request/', (req, res) => {
+    let username_a = req.param["username_a"];
+    let username_b = req.body["username_b"];
+
+    if (username_a && username_b) {
+
+        // check to make sure both users exist
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        .then( (rows) => {
+            let memberIDs = rows["memberid"];
+            let usernames = rows["username"];
+
+            let memberID_a = memberIDs[usernames.indexOf(username_a)];
+            let memberID_b = memberIDs[usernames.indexOf(username_b)];
+
+            let params = [memberID_a, memberID_b];
+
+            db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
+            .then(
+                res.send({
+                    success: true,
+                    message: "friend request sent"
+                })
+            );
+        })    
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "one of the usernames does not exist"
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            message: "missing required information"
         });
     }
 });
 
-
-// GET a contact connection
+// GET a contact's connections
 /*
 ON SUCCESS:
 success: true
@@ -118,7 +167,7 @@ error: error trace
 
 Failure may also return 'input' containing the required fields that were not supplied
 */
-router.get('/', (req, res) => {
+router.get('/:username/', (req, res) => {
     let username = req.param("username");
 
     if (username) {
@@ -166,68 +215,69 @@ router.get('/', (req, res) => {
 });
 
 
-// UPDATE a contact connection
-// The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
-/*
-ON SUCCESS:
-success: true
-verified: the new verified status
-message: human-readable success case
+// not yet implemented
+// // UPDATE a contact connection
+// // The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
+// /*
+// ON SUCCESS:
+// success: true
+// verified: the new verified status
+// message: human-readable success case
 
-ON FAILURE:
-success: false
-message: human-readable message
-error: error trace
+// ON FAILURE:
+// success: false
+// message: human-readable message
+// error: error trace
 
-Failure may also return 'input' containing the required fields that were not supplied
-*/
-router.put('/', (req, res) => {
-    let username_a = req.body["username_a"];
-    let username_b = req.body["username_b"];
-    let new_status = req.body["new_status"]
+// Failure may also return 'input' containing the required fields that were not supplied
+// */
+// router.put('/', (req, res) => {
+//     let username_a = req.body["username_a"];
+//     let username_b = req.body["username_b"];
+//     let new_status = req.body["new_status"]
 
-    if (username_a && username_b && new_status) {
-        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
-        .then( un_a => {
-            let userid_a = un_a["memberid"];
-            db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
-            .then( un_b => {
-                let userid_b = un_b["memberid"];
-                let params = [userid_a, userid_b, new_status];
-                db.none("UPDATE Contacts SET Verified=$3 WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
-                .then(() => {
-                    res.send({
-                        success: true,
-                        message: "status updated"
-                    });
-                })
-                .catch((err) => {
-                    res.send({
-                        success:false,
-                        error:err
-                    });
-                });
-            })
-            .catch((err) => {
-                res.send({
-                    success:false,
-                    error:err
-                })
-            });
-        })
-        .catch((err) => {
-            res.send({
-                success:false,
-                error:err
-            })
-        });
-    } else {
-        res.send({
-            success: false,
-            input: req.body,
-            message: "Missing username"
-        })
-    }
-});
+//     if (username_a && username_b && new_status) {
+//         db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
+//         .then( un_a => {
+//             let userid_a = un_a["memberid"];
+//             db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
+//             .then( un_b => {
+//                 let userid_b = un_b["memberid"];
+//                 let params = [userid_a, userid_b, new_status];
+//                 db.none("UPDATE Contacts SET Verified=$3 WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
+//                 .then(() => {
+//                     res.send({
+//                         success: true,
+//                         message: "status updated"
+//                     });
+//                 })
+//                 .catch((err) => {
+//                     res.send({
+//                         success:false,
+//                         error:err
+//                     });
+//                 });
+//             })
+//             .catch((err) => {
+//                 res.send({
+//                     success:false,
+//                     error:err
+//                 })
+//             });
+//         })
+//         .catch((err) => {
+//             res.send({
+//                 success:false,
+//                 error:err
+//             })
+//         });
+//     } else {
+//         res.send({
+//             success: false,
+//             input: req.body,
+//             message: "Missing username"
+//         })
+//     }
+// });
 
 module.exports = router;
