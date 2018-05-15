@@ -9,19 +9,28 @@ var router = express.Router();
 Accept a new friend request. Joy.
 */
 router.post('/:username_a/accept/', (req, res) => {
-    let username_a = req.param["username_a"];
+    let username_a = req.param("username_a");
     let username_b = req.body["username_b"];
+
+    console.log(username_a);
+    console.log(username_b);
 
     if (username_a && username_b) {
 
         // check to make sure both users exist
-        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a, username_b])
         .then( (rows) => {
-            let memberIDs = rows["memberid"];
-            let usernames = rows["username"];
+            
+            let memberID_a = null;
+            let memberID_b = null;
 
-            let memberID_a = memberIDs[usernames.indexOf(username_a)];
-            let memberID_b = memberIDs[usernames.indexOf(username_b)];
+            if (rows[0]["username"] == username_a) {
+                memberID_a = rows[0]["memberid"];
+                memberID_b = rows[1]["memberid"];
+            } else {
+                memberID_a = rows[1]["memberid"];
+                memberID_b = rows[0]["memberid"];
+            }
 
             let params = [memberID_a, memberID_b];
 
@@ -62,19 +71,25 @@ router.post('/:username_a/accept/', (req, res) => {
 Reject a friend request. Womp womp.
 */
 router.post('/:username_a/reject/', (req, res) => {
-    let username_a = req.param["username_a"];
+    let username_a = req.param("username_a");
     let username_b = req.body["username_b"];
 
     if (username_a && username_b) {
 
         // check to make sure both users exist
-        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a, username_b])
         .then( (rows) => {
-            let memberIDs = rows["memberid"];
-            let usernames = rows["username"];
 
-            let memberID_a = memberIDs[usernames.indexOf(username_a)];
-            let memberID_b = memberIDs[usernames.indexOf(username_b)];
+            let memberID_a = null;
+            let memberID_b = null;
+
+            if (rows[0]["username"] == username_a) {
+                memberID_a = rows[0]["memberid"];
+                memberID_b = rows[1]["memberid"];
+            } else {
+                memberID_a = rows[1]["memberid"];
+                memberID_b = rows[0]["memberid"];
+            }
 
             let params = [memberID_a, memberID_b];
 
@@ -115,19 +130,25 @@ router.post('/:username_a/reject/', (req, res) => {
 Request friendship. Yay.
 */
 router.post('/:username_a/request/', (req, res) => {
-    let username_a = req.param["username_a"];
+    let username_a = req.param("username_a");
     let username_b = req.body["username_b"];
 
     if (username_a && username_b) {
 
         // check to make sure both users exist
-        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a])
+        db.many("SELECT Username, MemberID FROM Members WHERE (Username=$1 OR Username=$2)", [username_a, username_b])
         .then( (rows) => {
-            let memberIDs = rows["memberid"];
-            let usernames = rows["username"];
 
-            let memberID_a = memberIDs[usernames.indexOf(username_a)];
-            let memberID_b = memberIDs[usernames.indexOf(username_b)];
+            let memberID_a = null;
+            let memberID_b = null;
+
+            if (rows[0]["username"] == username_a) {
+                memberID_a = rows[0]["memberid"];
+                memberID_b = rows[1]["memberid"];
+            } else {
+                memberID_a = rows[1]["memberid"];
+                memberID_b = rows[0]["memberid"];
+            }
 
             let params = [memberID_a, memberID_b];
 
