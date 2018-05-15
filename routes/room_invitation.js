@@ -39,84 +39,56 @@ router.post("/", (req, res) => {
     let receiver = req.body['receiver'];
     let ID = req.body['chatid'];
 
-    let query = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
+    let invite = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
                 VALUES
                 ((SELECT MemberId FROM Members WHERE Username = $1),
                 (SELECT MemberId FROM Members WHERE Username = $2),
                 $3)`;
     let params = [sender, receiver, ID];
-    let checkIfUserExists = `select * from chatmembers
+    let checkIfUserExists = `select memberid from chatmembers
                             where chatid = $1
                             and memberid = (select memberid from members where username = $2)`;
+    let checkIfInvitationExist = `select from invitations
+                    where roomid = $1 and receiverid = (SELECT MemberId FROM Members WHERE Username = $2)
+                    and senderid = (SELECT MemberId FROM Members WHERE Username = $3)`;
+
     // Check if other already in the room
      db.oneOrNone(checkIfUserExists, [ID, receiver])
-    .then((row) => {
-        if (!row) {
-            // continue to check if an invitation has been sent
-            db.oneOrNone(checkIfInvitationExists, params)
-            .then((row) =>{
-                // OK, no invitation any kind btw 
-                if (!otherRow) {
-                    // send 
-                    db.none(query, params)
-                    .then(()=>{
-                        res.send({
-                            success: true,
-                            message : "invitation sent"
-                        });
-                    })
-                    .catch((err) =>{
-                        res.send({
-                            success: false,
-                            message : "cannot send invitation"
-                        });
-                    });
-                } else {// there's already an invitation 
-                    res.send({
-                        success: false,
-                        message : "such invitation has been sent"
-                    });
-                } 
-            })
-            .catch((err)=>{
-                res.send({
-                    success: false,
-                    error : "fail to check if such invitation already exists"
-                });
-            });
-        // Now case other user already in the room      
-        } else {
+    .then(data => {
+        console.log(data);
+        if (data) {
             res.send({
                 success: false,
-                message : "They're already here!"
+                error: "user exists in room",
             });
-
+        } else { // continue to check if the other user receive invitation from
+            // same sender or not.
+            // Note: they could receive invitations to the same room but from others
+            return db.oneOrNone(checkIfInvitationExist, [ID, receiver, sender]);
         }
+    })
+    .then(data =>{
+        if (data) {
+            res.send({
+                success: false,
+                error: "You already invited them. Hang in there!",
+            });
+        } else { // Ok, they're not in the room and isn't invited yet
+            return db.none(invite, params);
+        }
+    })
+    .then(()=>{
+        res.send({
+            success : true,
+            message : "Invitation has been sent!"
+        });
     })
     .catch(err =>{
         res.send({
-            success: false,
-            error : "fail to check if user already in the room"
+            success : false,
+            error : err
         });
     });
-
-    
-
-    //let secondQuery = `INSERT INTO ChatMembers(ChatId, MemberId)
-    //        VALUES ($1, (SELECT MemberId FROM Members WHERE Username = $2))`;
-    //let params =  [ID, receiver];      
-    // db.none(secondQuery, params)
-    // .then(() => {
-    //     res.send({
-    //         success: true
-    //     });
-    // })
-    // .catch(err => {
-    //     res.send({
-    //         success: false,
-    //         error: err,
-    //     });
-    // });
 });
 
 // Service to accept to an invitation
