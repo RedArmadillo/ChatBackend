@@ -19,3 +19,6 @@
       * body: {username_b: the user accept a request from}
    * POST /contacts/[username]/reject
       * body: {username_b: the user to reject a request from}
+
+# Resources
+* https://mlsdev.com/blog/81-a-beginner-s-tutorial-for-understanding-restful-api
