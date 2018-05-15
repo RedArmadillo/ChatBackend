@@ -179,7 +179,8 @@ router.post('/:username_a/request/', (req, res) => {
 ON SUCCESS:
 success: true
 verified: the list of verified connections returned by the database
-pending: the list of pending connections returned by the database
+outgoing: the list of outgoing connections returned by the database
+incoming: the list of incoming connections returned by the database
 
 ON FAILURE:
 success: false
@@ -195,12 +196,27 @@ router.get('/:username/', (req, res) => {
         db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
         .then( members_row => {
             let userid = members_row["memberid"];
-            db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            // db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            db.any(`SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+            LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+            LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+            WHERE (contacts.MemberID_A=$1 OR contacts.MemberID_B=$1) AND contacts.Verified=1`, [userid])
+            
             .then((verified_rows) => {
-                db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_A=$1 AND Verified=0", [userid])
+                db.any(`SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+                LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+                LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+                WHERE contacts.MemberID_A=$1 AND contacts.Verified=0`, [userid])
+
                 .then((outgoing_rows) => {
-                    db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE MemberID_B=$1 AND Verified=0", [userid])
+                    db.any(`
+                    SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+                    LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+                    LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+                    WHERE contacts.MemberID_B=$1 AND contacts.Verified=0`, [userid])
                     .then((incoming_rows) => {
+                        
+
                         res.send({
                             success: true,
                             verified: verified_rows,
