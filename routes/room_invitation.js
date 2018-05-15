@@ -14,7 +14,7 @@ router.use(bodyParser.json());
 // Service to get all Invitations 
 router.get("/", (req, res) => {
     let receiverid = req.query['memberid'];
-    let query = `select c.name, m.username
+    let query = `select c.name, m.username, c.chatid
         from chats c left join invitations i on c.chatid = i.roomid
         left join members m on i.senderid = m.memberid
         where i.receiverid = $1 and i.verified = false;`
@@ -39,24 +39,54 @@ router.post("/", (req, res) => {
     let receiver = req.body['receiver'];
     let ID = req.body['chatid'];
 
-    // let query = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
-    //             VALUES
-    //             ((SELECT MemberId FROM Members WHERE Username = $1),
-    //             (SELECT MemberId FROM Members WHERE Username = $2),
-    //             $3)`;
-    
-    let secondQuery = `INSERT INTO ChatMembers(ChatId, MemberId)
-            VALUES ($1, (SELECT MemberId FROM Members WHERE Username = $2))`;
-    db.none(secondQuery, [ID, receiver])
-    .then(() => {
+    let invite = `INSERT INTO Invitations(SenderId, ReceiverId, Roomid)
+                VALUES
+                ((SELECT MemberId FROM Members WHERE Username = $1),
+                (SELECT MemberId FROM Members WHERE Username = $2),
+                $3)`;
+    let params = [sender, receiver, ID];
+    let checkIfUserExists = `select memberid from chatmembers
+                            where chatid = $1
+                            and memberid = (select memberid from members where username = $2)`;
+    let checkIfInvitationExist = `select from invitations
+                    where roomid = $1 and receiverid = (SELECT MemberId FROM Members WHERE Username = $2)
+                    and senderid = (SELECT MemberId FROM Members WHERE Username = $3)`;
+
+    // Check if other already in the room
+     db.oneOrNone(checkIfUserExists, [ID, receiver])
+    .then(data => {
+        console.log(data);
+        if (data) {
+            res.send({
+                success: false,
+                error: "user exists in room",
+            });
+        } else { // continue to check if the other user receive invitation from
+            // same sender or not.
+            // Note: they could receive invitations to the same room but from others
+            return db.oneOrNone(checkIfInvitationExist, [ID, receiver, sender]);
+        }
+    })
+    .then(data =>{
+        if (data) {
+            res.send({
+                success: false,
+                error: "You already invited them. Hang in there!",
+            });
+        } else { // Ok, they're not in the room and isn't invited yet
+            return db.none(invite, params);
+        }
+    })
+    .then(()=>{
         res.send({
-            success: true
+            success : true,
+            message : "Invitation has been sent!"
         });
     })
-    .catch(err => {
+    .catch(err =>{
         res.send({
-            success: false,
-            error: err,
+            success : false,
+            error : err
         });
     });
 });
