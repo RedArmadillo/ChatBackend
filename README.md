@@ -9,3 +9,13 @@
 * `.gitignore`
     * This file stops certain files from being commited in git, when you run `git add .`. For example, I'm using the vscode text editor, and it has a few files in the .vscode directory that aren't related to the code and therefore shouldn't be committed. 
     * Please avoid committing the `node_modules/` folder that will be created when you run `npm i`. Its a mess of a directory and contains a lot of stuff that's required for node.js to run, but really shouldn't be committed alongside the code
+
+# Endpoints (WIP)
+* /contacts/
+   * GET /contacts/[username]/
+   * POST /contacts/[username]/request
+      * body: {username_b: the user to send the request to}
+   * POST /contacts/[username]/accept
+      * body: {username_b: the user accept a request from}
+   * POST /contacts/[username]/reject
+      * body: {username_b: the user to reject a request from}
