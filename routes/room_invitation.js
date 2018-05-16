@@ -92,5 +92,47 @@ router.post("/", (req, res) => {
 });
 
 // Service to accept to an invitation
+router.put('/response', (req, res)=> {
+    let userid = req.body['memberid'];
+    let chatid = req.body['chatid'];
+    let accept = req.body['accept'];
+    let params = [chatid, userid];
+    let del = `delete from invitations where roomid = $1 and receiverid = $2`;
+    let add = `insert into chatmembers(chatid, memberid) values ($1, $2);`
+
+    // Either user accepts or rejects the invitation, we still delete the invitation
+    db.none(del, params)
+    .then(() => {
+        if (accept) { // case user accepts invitation
+            db.none(add, params)
+            .then(()=> {
+                res.send({
+                    success : true,
+                    message : "joined"
+                });
+            })
+            .catch(err => {
+                res.send({
+                    success : false,
+                    error : err
+                });
+            });
+        } else { // case when user rejects invitation
+            res.send({
+                success : true,
+                message : "declined"
+            });
+        }
+    })
+    .catch(err => {
+        res.send({
+            success: false,
+            error: err,
+        });
+    });
+
+
+});
+
 
 module.exports = router;
