@@ -92,7 +92,7 @@ router.post("/", (req, res) => {
 });
 
 // Service to response to an invitation
-router.post('/response', (req, res)=> {
+router.put('/response', (req, res)=> {
     let userid = req.body['memberid'];
     let chatid = req.body['chatid'];
     let accept = req.body['accept'];
@@ -102,7 +102,7 @@ router.post('/response', (req, res)=> {
 
  
     let joinQuery = `update invitations set Verified = true where roomid = $1 and receiverid = $2`;
-    let declineQuery = `update invitations set Verified = false where roomid = $1 and receiverid = $2`;
+    let declineQuery = `delete from invitations where roomid = $1 and receiverid = $2`;
 
     if (accept) {
         db.none(joinQuery, params)
