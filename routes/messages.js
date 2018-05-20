@@ -28,7 +28,7 @@ router.post("/sendMessages", (req, res) => {
         // after message is sent
         let getUserToken = `select firebase_token
                     from members m left join chatmembers c
-                        on m.memberid = c.memberid where c.chatid = $1;`
+                        on m.memberid = c.memberid where c.chatid = $1`;
         db.manyOrNone(getUserToken, chatId)
         .then((rows)=> {
             // Pushing notification after message sent
