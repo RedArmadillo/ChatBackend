@@ -8,9 +8,6 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 var request = require('request');
- 
-
-
 
 var fullBody = new Object();
 var key1 = "to";

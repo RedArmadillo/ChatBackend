@@ -37,11 +37,7 @@ app.use('/chatRoom', chatRoom);
 let invitation = require('./routes/room_invitation.js');
 app.use('/roomInvitation', invitation);
 
-let noti = require('./routes/notification.js');
-app.use('/pushNotification', noti);
 
-// let response = require('./routes/respond_invitation.js');
-// app.use('/responseInvitation', response);
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency
