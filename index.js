@@ -37,7 +37,8 @@ app.use('/chatRoom', chatRoom);
 let invitation = require('./routes/room_invitation.js');
 app.use('/roomInvitation', invitation);
 
-
+let token = require('./routes/update_token.js');
+app.use('/updateToken', token);
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency

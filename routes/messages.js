@@ -31,6 +31,7 @@ router.post("/sendMessages", (req, res) => {
                         on m.memberid = c.memberid where c.chatid = $1;`
         db.manyOrNone(getUserToken, chatId)
         .then((rows)=> {
+            // Pushing notification after message sent
             pushNoti(rows, chatId);
             res.send({
                 success: true,
