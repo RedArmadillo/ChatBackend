@@ -53,3 +53,6 @@ CREATE TABLE Locations (PrimaryKey SERIAL PRIMARY KEY,
                         ZIP INT,
                         FOREIGN KEY(MemberID) REFERENCES Members(MemberID)
 );
+
+ALTER TABLE Members
+ADD COLUMN firebase_token VARCHAR(255);
