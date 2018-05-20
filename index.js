@@ -37,6 +37,9 @@ app.use('/chatRoom', chatRoom);
 let invitation = require('./routes/room_invitation.js');
 app.use('/roomInvitation', invitation);
 
+let noti = require('./routes/notification.js');
+app.use('/pushNotification', noti);
+
 // let response = require('./routes/respond_invitation.js');
 // app.use('/responseInvitation', response);
 /**
