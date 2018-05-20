@@ -9,6 +9,7 @@ router.post("/sendMessages", (req, res) => {
     let username = req.body['username'];
     let message = req.body['message'];
     let chatId = req.body['chatId'];
+    let roomName = req.body['roomname'];
     if(!username || !message || !chatId) {
         res.send({
             success: false,
@@ -28,11 +29,12 @@ router.post("/sendMessages", (req, res) => {
         // after message is sent
         let getUserToken = `select firebase_token
                     from members m left join chatmembers c
-                        on m.memberid = c.memberid where c.chatid = $1`;
-        db.manyOrNone(getUserToken, chatId)
+                        on m.memberid = c.memberid
+                        where c.chatid = $1 and m.username != $2`;
+        db.manyOrNone(getUserToken, [chatId, username])
         .then((rows)=> {
             // Pushing notification after message sent
-            pushNoti(rows, chatId);
+            pushNoti(rows, chatId, roomName);
             res.send({
                 success: true,
                 message : "notification sent"
@@ -73,6 +75,8 @@ router.get("/getMessages", (req, res) => {
         })
     });
 });
+
+
 
 
 module.exports = router;

@@ -1,14 +1,28 @@
 let db = require('../utilities/utils').db;
 var request = require('request');
 
-function push_notification(token, chatid) {
+function push_notification(tokens, chatid, roomname) {
+    console.log("room in array " + roomname);
+
+    for (var i in tokens) {
+        if (tokens[i].firebase_token != null) {
+            handleSingleToken(tokens[i].firebase_token, roomname);
+        }
+    }
+    
+}
+
+function handleSingleToken(token, chatid, roomname) {
+    console.log("room in single " + roomname);
+
+    let message = "You have new message(s) in " + roomname;
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
     let value2 = "type_a";
     let key3 = "notification";
     let value3 = {
-        body : "You have new message(s) from ",
+        body : message,
         title: "Red Armadillo"
     };
 
