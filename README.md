@@ -13,6 +13,9 @@
 # Endpoints (WIP)
 * /contacts/
    * GET /contacts/[username]/
+   * GET /contacts/[username]/verified
+   * GET /contacts/[username]/outgoing
+   * GET /contacts/[username]/incoming
    * POST /contacts/[username]/request
       * body: {username_b: the user to send the request to}
    * POST /contacts/[username]/accept
