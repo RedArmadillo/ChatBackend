@@ -256,6 +256,148 @@ router.get('/:username/', (req, res) => {
 });
 
 
+// GET a contact's verified connections
+/*
+ON SUCCESS:
+success: true
+verified: the list of verified connections returned by the database
+
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
+*/
+router.get('/:username/verified', (req, res) => {
+    let username = req.param("username");
+    if (username) {
+        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
+        .then( members_row => {
+            let userid = members_row["memberid"];
+            // db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            db.any(`SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+            LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+            LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+            WHERE (contacts.MemberID_A=$1 OR contacts.MemberID_B=$1) AND contacts.Verified=1`, [userid])
+            
+            .then((verified_rows) => {
+                res.send({
+                    success: true,
+                    verified: verified_rows
+                });
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "No user found by that username",
+                error: err
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            message: "Missing username"
+        });
+    }
+});
+
+
+// GET a contact's verified connections
+/*
+ON SUCCESS:
+success: true
+outgoing: the list of verified connections returned by the database
+
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
+*/
+router.get('/:username/outgoing', (req, res) => {
+    let username = req.param("username");
+    if (username) {
+        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
+        .then( members_row => {
+            let userid = members_row["memberid"];
+            // db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            db.any(`SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+            LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+            LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+            WHERE contacts.MemberID_A=$1 AND contacts.Verified=0`, [userid])
+            
+            .then((verified_rows) => {
+                res.send({
+                    success: true,
+                    outgoing: verified_rows
+                });
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "No user found by that username",
+                error: err
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            message: "Missing username"
+        });
+    }
+});
+
+
+// GET a contact's verified connections
+/*
+ON SUCCESS:
+success: true
+incoming: the list of verified connections returned by the database
+
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
+*/
+router.get('/:username/incoming', (req, res) => {
+    let username = req.param("username");
+    if (username) {
+        db.one("SELECT MemberID FROM Members WHERE Username=$1", [username])
+        .then( members_row => {
+            let userid = members_row["memberid"];
+            // db.any("SELECT MemberID_A, MemberID_B, Verified FROM Contacts WHERE (MemberID_A=$1 OR MemberID_B=$1) AND Verified=1", [userid])
+            db.any(`SELECT m1.username AS username_a, m2.username AS username_b FROM contacts 
+            LEFT JOIN members m1 ON contacts.memberid_a = m1.memberid 
+            LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
+            WHERE contacts.MemberID_B=$1 AND contacts.Verified=0`, [userid])
+            
+            .then((verified_rows) => {
+                res.send({
+                    success: true,
+                    verified: verified_rows
+                });
+            });
+        })
+        .catch((err) => {
+            res.send({
+                success: false,
+                message: "No user found by that username",
+                error: err
+            });
+        });
+    } else {
+        res.send({
+            success: false,
+            input: req.body,
+            message: "Missing username"
+        });
+    }
+});
+
+
+
 // not yet implemented
 // // UPDATE a contact connection
 // // The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
