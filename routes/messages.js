@@ -4,7 +4,7 @@ let db = require('../utilities/utils').db;
 let pushNoti = require('../utilities/push_noti.js');
 var router = express.Router();
 var request = require('request');
-
+var concat;
 router.post("/sendMessages", (req, res) => {
     let username = req.body['username'];
     let message = req.body['message'];
@@ -34,7 +34,8 @@ router.post("/sendMessages", (req, res) => {
         db.manyOrNone(getUserToken, [chatId, username])
         .then((rows)=> {
             // Pushing notification after message sent
-            pushNoti(rows, chatId, roomName);
+            concat = "You have new message(s) in \"" + roomName + "\"";
+            pushNoti(rows, chatId, concat);
             res.send({
                 success: true,
                 message : "notification sent"
