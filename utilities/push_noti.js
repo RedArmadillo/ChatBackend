@@ -1,6 +1,6 @@
 let db = require('../utilities/utils').db;
 var request = require('request');
-function push_notification(tokens, chatid, msg) {
+function push_notification(tokens, msg) {
     console.log("in push noti " + msg);
     let forwardedMsg = msg;
     for (var i in tokens) {
@@ -42,4 +42,4 @@ function handleSingleToken(token, message) {
     });
 }
 
-module.exports = push_notification;
+module.exports = {push_notification, handleSingleToken};

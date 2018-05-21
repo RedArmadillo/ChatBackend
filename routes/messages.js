@@ -35,7 +35,7 @@ router.post("/sendMessages", (req, res) => {
         .then((rows)=> {
             // Pushing notification after message sent
             concat = "You have new message(s) in \"" + roomName + "\"";
-            pushNoti(rows, chatId, concat);
+            pushNoti(rows, concat);
             res.send({
                 success: true,
                 message : "notification sent"

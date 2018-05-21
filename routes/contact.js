@@ -3,6 +3,8 @@ const app = express();
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 let db = require('../utilities/utils').db;
+let pushNoti = require('../utilities/push_noti.js').handleSingleToken;
+
 var router = express.Router();
 
 /*
@@ -134,7 +136,6 @@ router.post('/:username_a/request/', (req, res) => {
     let username_b = req.body["username_b"];
 
     if (username_a && username_b) {
-
         // check to make sure both users exist
         db.many("SELECT Username, MemberID FROM Members WHERE (Username=$1 OR Username=$2)", [username_a, username_b])
         .then( (rows) => {
@@ -151,14 +152,17 @@ router.post('/:username_a/request/', (req, res) => {
             }
 
             let params = [memberID_a, memberID_b];
-
             db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
-            .then(
-                res.send({
-                    success: true,
-                    message: "friend request sent"
-                })
-            );
+            .then(()=>{
+                db.one("select firebase_token from Members where username = $1", username_b)
+                .then(row => {
+                    pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!");
+                    res.send({
+                        success: true,
+                        message: "friend request sent"
+                    })
+                });
+            });
         })    
         .catch((err) => {
             res.send({
