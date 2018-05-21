@@ -219,9 +219,9 @@ router.get('/:username/', (req, res) => {
 
                         res.send({
                             success: true,
-                            verified: verified_rows,
-                            outgoing: outgoing_rows,
-                            incoming: incoming_rows
+                            verified: Array.from(getSetFromRes(verified_rows, username)),
+                            outgoing: Array.from(getSetFromRes(outgoing_rows, username)),
+                            incoming: Array.from(getSetFromRes(incoming_rows, username))
                         });
                     });
                 })
@@ -282,7 +282,7 @@ router.get('/:username/verified', (req, res) => {
             .then((verified_rows) => {
                 res.send({
                     success: true,
-                    verified: verified_rows
+                    verified: Array.from(getSetFromRes(verified_rows, username)),
                 });
             });
         })
@@ -326,10 +326,10 @@ router.get('/:username/outgoing', (req, res) => {
             LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
             WHERE contacts.MemberID_A=$1 AND contacts.Verified=0`, [userid])
             
-            .then((verified_rows) => {
+            .then((outgoing_rows) => {
                 res.send({
                     success: true,
-                    outgoing: verified_rows
+                    outgoing: Array.from(getSetFromRes(outgoing_rows, username)),
                 });
             });
         })
@@ -373,10 +373,10 @@ router.get('/:username/incoming', (req, res) => {
             LEFT JOIN members m2 ON contacts.memberid_b = m2.memberid 
             WHERE contacts.MemberID_B=$1 AND contacts.Verified=0`, [userid])
             
-            .then((verified_rows) => {
+            .then((incoming_rows) => {
                 res.send({
                     success: true,
-                    verified: verified_rows
+                    incoming: Array.from(getSetFromRes(incoming_rows, username)),
                 });
             });
         })
@@ -396,7 +396,22 @@ router.get('/:username/incoming', (req, res) => {
     }
 });
 
-
+function getSetFromRes(l, username) {
+    // we will get list l in format [{username_a:una, username_b:unb}, {...}, ...]
+    let s = new Set();
+    for (i = 0; i < l.length; i++) {
+        let entry = l[i];
+        for (var key in entry) {
+            // skip loop if the property is from prototype
+            if (!entry.hasOwnProperty(key)) continue;
+            var obj = entry[key];
+            if (obj != username) {                
+                s.add(obj);
+            }
+        }
+    }
+    return s;
+}
 
 // not yet implemented
 // // UPDATE a contact connection
