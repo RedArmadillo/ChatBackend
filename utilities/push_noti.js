@@ -30,8 +30,8 @@ function handleSingleToken(token, message) {
         method: 'POST',
         body: JSON.stringify(fullBody),
         headers: {
-        'Authorization' : 'key=AAAABwN1kqU:APA91bG8YPbMWrNfuZVIRyB1Wuy93gaTYiERpwKWydlnSBqBfhlWznL03RCDCOXVbXdAANqg9H0DY7Mxc9ZtHKRbx3WpaTJegacCsm_j7EhWaKTJl1khyLu9tF5-Kw_Xc6b34SY6ROtt',
-        //'Authorization' : process.env.FIREBASE_SERVER_KEY,
+        // 'Authorization' : 'key=AAAABwN1kqU:APA91bG8YPbMWrNfuZVIRyB1Wuy93gaTYiERpwKWydlnSBqBfhlWznL03RCDCOXVbXdAANqg9H0DY7Mxc9ZtHKRbx3WpaTJegacCsm_j7EhWaKTJl1khyLu9tF5-Kw_Xc6b34SY6ROtt',
+        'Authorization' : process.env.FIREBASE_SERVER_KEY,
         'Content-Type' : 'application/json',
         }
     };
