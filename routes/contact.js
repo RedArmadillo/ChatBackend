@@ -154,9 +154,10 @@ router.post('/:username_a/request/', (req, res) => {
             let params = [memberID_a, memberID_b];
             db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
             .then(()=>{
-                db.one("select firebase_token from Members where username = $1", username_b)
+                db.one("select firebase_token from Members where memberid = $1", memberID_b)
                 .then(row => {
                     pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!");
+                    console.log("token of B: " + memberID_b);
                     res.send({
                         success: true,
                         message: "friend request sent"

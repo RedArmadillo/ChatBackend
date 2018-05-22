@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 let db = require('../utilities/utils').db;
-let pushNoti = require('../utilities/push_noti.js');
+let pushNoti = require('../utilities/push_noti.js').push_notification;
 var router = express.Router();
 var request = require('request');
 var concat;
@@ -44,7 +44,8 @@ router.post("/sendMessages", (req, res) => {
         .catch(err => {
             res.send({
                 success: false,
-                message: "fail to push notification"
+                message: "fail to push notification",
+                error : err
             });
         });
     }).catch((err) => {
