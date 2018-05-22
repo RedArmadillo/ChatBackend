@@ -8,9 +8,10 @@ var router = express.Router();
 router.use(bodyParser.json());
 
 router.post('/', (req, res) => {
-    let memberid = req.body['memberid'];
+    let u_name = req.body['username'];
     let token = req.body['token'];
-    db.none("update members set firebase_token = $1 where memberid = $2", [token, memberid])
+    console.log("received token " + token + " for user " + u_name);
+    db.none("update members set firebase_token = $1 where username = $2", [token, u_name])
     .then(()=>{
         res.send({
             success: true,
@@ -20,7 +21,7 @@ router.post('/', (req, res) => {
     .catch(err => {
         res.send({
             success: false,
-            message : "failt to update token"
+            message : "fail to update token"
         });
     });
 
