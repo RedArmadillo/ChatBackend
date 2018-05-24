@@ -1,16 +1,17 @@
 let db = require('../utilities/utils').db;
 var request = require('request');
-function push_notification(tokens, msg, thesender) {
+function push_notification(tokens, msg, thesender, thetag) {
     let forwardedMsg = msg;
     let sender = thesender;
+    let tag = thetag;
     for (var i in tokens) {
         if (tokens[i].firebase_token != null) {
-            handleSingleToken(tokens[i].firebase_token, forwardedMsg, sender);
+            handleSingleToken(tokens[i].firebase_token, forwardedMsg, sender, tag);
         }
     }
 }
 
-function handleSingleToken(token, message, sender) {
+function handleSingleToken(token, message, sender, thetag) {
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
@@ -19,15 +20,17 @@ function handleSingleToken(token, message, sender) {
     let value3 = {
         body : message,
         title: sender,
-        icon : "ic_chat"
+        icon : "ic_chat",
+        tag : thetag,
+        sound: "default"
     };
 
     // Passing the argument token here
     fullBody[key1] = token;
     fullBody[key2] = value2;
     fullBody[key3] = value3;
+    
     // The options of POST request 
-
     let options = {
         url: 'https://fcm.googleapis.com/fcm/send',
         method: 'POST',

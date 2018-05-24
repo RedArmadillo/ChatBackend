@@ -84,7 +84,7 @@ router.post("/", (req, res) => {
     .then(()=>{
         db.one("select firebase_token from Members where username=$1", receiver)
         .then((row) =>{
-            pushNoti(row.firebase_token, "Want to join my chat room?", sender);
+            pushNoti(row.firebase_token, "Want to join my chat room?", sender, "invitation");
         })
         .catch(err=>{
             res.send({
@@ -116,7 +116,7 @@ router.put('/response', (req, res)=> {
     console.log("Userid " + userid);
     let add = `insert into chatmembers(chatid, memberid) values ($1, $2)`;
     let joinQuery = `update invitations set Verified = true where roomid = $1 and receiverid = $2`;
-    let declineQuery = `delete from invitations where roomid = $1 and receiverid = $2`;
+    let delQuery = `delete from invitations where roomid = $1 and receiverid = $2`;
 
     // // If user agree to join
     // if (accept) {
@@ -145,17 +145,34 @@ router.put('/response', (req, res)=> {
     //     });
     // // If they decline
     // } else {
-        db.none(declineQuery, params)
+        db.none(delQuery, params)
         .then(() => {
-            res.send({
-                success : true,
-                message : "declined"
-            });
+            if (accept) {
+                db.none(add, params)
+                .then(()=> {
+                    res.send({
+                        success : true,
+                        message : "added to room"
+                    });
+                })
+                .catch(err => {
+                    res.send({
+                        success : false,
+                        error : "add error",
+                        detail : err
+                    });
+                });
+            } else {
+                res.send({
+                    success : true,
+                    message : "declined"
+                });
+            }
         })
         .catch(err => {
             res.send({
                 success : false,
-                error : "decline error"
+                error : "error deleting invitation"
             });
         });
     //}

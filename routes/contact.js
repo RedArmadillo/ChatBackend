@@ -156,7 +156,7 @@ router.post('/:username_a/request/', (req, res) => {
             .then(()=>{
                 db.one("select firebase_token from Members where memberid = $1", memberID_b)
                 .then(row => {
-                    pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!");
+                    pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!", username_a, "connection");
                     console.log("token of B: " + memberID_b);
                     res.send({
                         success: true,
