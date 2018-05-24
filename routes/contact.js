@@ -418,69 +418,60 @@ function getSetFromRes(l, username) {
     return s;
 }
 
-// not yet implemented
-// // UPDATE a contact connection
-// // The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
-// /*
-// ON SUCCESS:
-// success: true
-// verified: the new verified status
-// message: human-readable success case
+// UPDATE a contact connection
+// The Verified column is an int. 0 DEFAULT denotes an unconfirmed request, a 1 is confirmed, a -1 is declined
+/*
+ON SUCCESS:
+success: true
+verified: the new verified status
+message: human-readable success case
 
-// ON FAILURE:
-// success: false
-// message: human-readable message
-// error: error trace
+ON FAILURE:
+success: false
+message: human-readable message
+error: error trace
 
-// Failure may also return 'input' containing the required fields that were not supplied
-// */
-// router.put('/', (req, res) => {
-//     let username_a = req.body["username_a"];
-//     let username_b = req.body["username_b"];
-//     let new_status = req.body["new_status"]
+Failure may also return 'input' containing the required fields that were not supplied
+*/
+router.post('/:username_a/remove/', (req, res) => {
+    let username_a = req.param("username_a");
+    let username_b = req.body["username_b"];
 
-//     if (username_a && username_b && new_status) {
-//         db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_a])
-//         .then( un_a => {
-//             let userid_a = un_a["memberid"];
-//             db.one("SELECT MemberID FROM Members WHERE Username=$1", [username_b])
-//             .then( un_b => {
-//                 let userid_b = un_b["memberid"];
-//                 let params = [userid_a, userid_b, new_status];
-//                 db.none("UPDATE Contacts SET Verified=$3 WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
-//                 .then(() => {
-//                     res.send({
-//                         success: true,
-//                         message: "status updated"
-//                     });
-//                 })
-//                 .catch((err) => {
-//                     res.send({
-//                         success:false,
-//                         error:err
-//                     });
-//                 });
-//             })
-//             .catch((err) => {
-//                 res.send({
-//                     success:false,
-//                     error:err
-//                 })
-//             });
-//         })
-//         .catch((err) => {
-//             res.send({
-//                 success:false,
-//                 error:err
-//             })
-//         });
-//     } else {
-//         res.send({
-//             success: false,
-//             input: req.body,
-//             message: "Missing username"
-//         })
-//     }
-// });
+    if (username_a && username_b) {
+
+        // check to make sure both users exist
+        db.many("SELECT Username, MemberID FROM Members WHERE Username=$1 OR Username=$2", [username_a, username_b])
+        .then( (rows) => {
+
+            let memberID_a = null;
+            let memberID_b = null;
+
+            if (rows[0]["username"] == username_a) {
+                memberID_a = rows[0]["memberid"];
+                memberID_b = rows[1]["memberid"];
+            } else {
+                memberID_a = rows[1]["memberid"];
+                memberID_b = rows[0]["memberid"];
+            }
+
+            let params = [memberID_a, memberID_b];
+
+            db.none("UPDATE Contacts SET Verified=-1 WHERE (MemberID_A=$2 AND MemberID_B=$1) OR (MemberID_A=$1 AND MemberID_B=$2)", params)
+            .then( () => {
+                res.send({
+                    success: true,
+                    message: "contact removed",
+                });
+            })
+            .catch( (err) => {
+                res.send({
+                    success: false,
+                    message: "could not remove contact",
+                    error: err
+                });
+            });
+        })
+    }
+});
 
 module.exports = router;
