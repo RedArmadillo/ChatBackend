@@ -433,7 +433,7 @@ error: error trace
 
 Failure may also return 'input' containing the required fields that were not supplied
 */
-router.post('/:username_a/remove/', (req, res) => {
+router.post('/:username_a/remove', (req, res) => {
     let username_a = req.param("username_a");
     let username_b = req.body["username_b"];
 
