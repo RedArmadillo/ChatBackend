@@ -5,6 +5,7 @@ const app = express();
 const bodyParser = require("body-parser");
 
 let db = require('../utilities/utils').db;
+let pushNoti = require('../utilities/push_noti.js').handleSingleToken;
 
 var router = express.Router();
 
@@ -56,11 +57,13 @@ router.post("/", (req, res) => {
      db.oneOrNone(checkIfUserExists, [ID, receiver])
     .then(data => {
         console.log(data);
+        // Case they're in the room
         if (data) {
             res.send({
                 success: false,
-                error: "user exists in room",
+                error: "user exists in room"
             });
+            return;
         } else { // continue to check if the other user receive invitation from
             // same sender or not.
             // Note: they could receive invitations to the same room but from others
@@ -73,9 +76,22 @@ router.post("/", (req, res) => {
                 success: false,
                 error: "You already invited them. Hang in there!",
             });
+            return;
         } else { // Ok, they're not in the room and isn't invited yet
             return db.none(invite, params);
         }
+    })
+    .then(()=>{
+        db.one("select firebase_token from Members where username=$1", receiver)
+        .then((row) =>{
+            pushNoti(row.firebase_token, "Want to join my chat room?", sender);
+        })
+        .catch(err=>{
+            res.send({
+                success : false,
+                error : err
+            });
+        })
     })
     .then(()=>{
         res.send({
@@ -99,36 +115,36 @@ router.put('/response', (req, res)=> {
     let params = [chatid, userid];
     console.log("Userid " + userid);
     let add = `insert into chatmembers(chatid, memberid) values ($1, $2)`;
-
- 
     let joinQuery = `update invitations set Verified = true where roomid = $1 and receiverid = $2`;
     let declineQuery = `delete from invitations where roomid = $1 and receiverid = $2`;
 
-    if (accept) {
-        db.none(joinQuery, params)
-        .then(() =>{
-            db.none(add, params)
-            .then(()=> {
-                res.send({
-                    success : true,
-                    message : "added to room"
-                });
-            })
-            .catch(err => {
-                res.send({
-                    success : false,
-                    error : "add error",
-                    detail : err
-                });
-            });
-        })
-        .catch(err => {
-            res.send({
-                success : false,
-                error : "join error"
-            });
-        });
-    } else {
+    // // If user agree to join
+    // if (accept) {
+    //     db.none(joinQuery, params)
+    //     .then(() =>{
+    //         db.none(add, params)
+    //         .then(()=> {
+    //             res.send({
+    //                 success : true,
+    //                 message : "added to room"
+    //             });
+    //         })
+    //         .catch(err => {
+    //             res.send({
+    //                 success : false,
+    //                 error : "add error",
+    //                 detail : err
+    //             });
+    //         });
+    //     })
+    //     .catch(err => {
+    //         res.send({
+    //             success : false,
+    //             error : "join error"
+    //         });
+    //     });
+    // // If they decline
+    // } else {
         db.none(declineQuery, params)
         .then(() => {
             res.send({
@@ -142,43 +158,7 @@ router.put('/response', (req, res)=> {
                 error : "decline error"
             });
         });
-    }
-    // let del = `delete from invitations where roomid = $1 and receiverid = $2`;
-    // let add = `insert into chatmembers(chatid, memberid) values ($1, $2);`
-
-    // // Check if their
-    //     // Either user accepts or rejects the invitation, we still delete the invitation
-    //     db.none(del, params)
-    //     .then(() => {
-    //         if (accept) { // case user accepts invitation
-    //             db.none(add, params)
-    //             .then(()=> {
-    //                 res.send({
-    //                     success : true,
-    //                     message : "joined"
-    //                 });
-    //             })
-    //             .catch(err => {
-    //                 res.send({
-    //                     success : false,
-    //                     error : err
-    //                 });
-    //             });
-    //         } else { // case when user rejects invitation
-    //             res.send({
-    //                 success : true,
-    //                 message : "declined"
-    //             });
-    //         }
-    //     })
-    //     .catch(err => {
-    //         res.send({
-    //             success: false,
-    //             error: err,
-    //         });
-    //     });
-
-
+    //}
 });
 
 

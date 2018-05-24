@@ -1,15 +1,16 @@
 let db = require('../utilities/utils').db;
 var request = require('request');
-function push_notification(tokens, msg) {
+function push_notification(tokens, msg, thesender) {
     let forwardedMsg = msg;
+    let sender = thesender;
     for (var i in tokens) {
         if (tokens[i].firebase_token != null) {
-            handleSingleToken(tokens[i].firebase_token, forwardedMsg);
+            handleSingleToken(tokens[i].firebase_token, forwardedMsg, sender);
         }
     }
 }
 
-function handleSingleToken(token, message) {
+function handleSingleToken(token, message, sender) {
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
@@ -17,7 +18,8 @@ function handleSingleToken(token, message) {
     let key3 = "notification";
     let value3 = {
         body : message,
-        title: "Red Armadillo"
+        title: sender,
+        icon : "ic_chat"
     };
 
     // Passing the argument token here
@@ -25,13 +27,14 @@ function handleSingleToken(token, message) {
     fullBody[key2] = value2;
     fullBody[key3] = value3;
     // The options of POST request 
+
     let options = {
         url: 'https://fcm.googleapis.com/fcm/send',
         method: 'POST',
         body: JSON.stringify(fullBody),
         headers: {
         'Authorization' : 'key=AAAABwN1kqU:APA91bG8YPbMWrNfuZVIRyB1Wuy93gaTYiERpwKWydlnSBqBfhlWznL03RCDCOXVbXdAANqg9H0DY7Mxc9ZtHKRbx3WpaTJegacCsm_j7EhWaKTJl1khyLu9tF5-Kw_Xc6b34SY6ROtt',
-        //'Authorization' : process.env.FIREBASE_SERVER_KEY,
+        // 'Authorization' : process.env.FIREBASE_SERVER_KEY,
         'Content-Type' : 'application/json',
         }
     };
