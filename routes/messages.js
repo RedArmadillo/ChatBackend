@@ -4,7 +4,7 @@ let db = require('../utilities/utils').db;
 let pushNoti = require('../utilities/push_noti.js').push_notification;
 var router = express.Router();
 var request = require('request');
-var concat;
+
 router.post("/sendMessages", (req, res) => {
     let username = req.body['username'];
     let message = req.body['message'];
@@ -22,10 +22,7 @@ router.post("/sendMessages", (req, res) => {
     WHERE Username=$3`
     db.none(insert, [chatId, message, username])
     .then(() => {
-        // res.send({
-        //     success: true
-        // });
-        // I will change the callback such that it will push notification to other users
+        // change the callback such that it will push notification to other users
         // after message is sent
         let getUserToken = `select firebase_token
                     from members m left join chatmembers c
@@ -34,8 +31,7 @@ router.post("/sendMessages", (req, res) => {
         db.manyOrNone(getUserToken, [chatId, username])
         .then((rows)=> {
             // Pushing notification after message sent
-            concat = "You have new message(s) in \"" + roomName + "\"";
-            pushNoti(rows, message, username, "message");
+            pushNoti(rows, message, username, roomName);
             res.send({
                 success: true,
                 message : "notification sent"
@@ -77,8 +73,5 @@ router.get("/getMessages", (req, res) => {
         })
     });
 });
-
-
-
 
 module.exports = router;
