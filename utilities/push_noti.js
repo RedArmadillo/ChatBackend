@@ -1,15 +1,16 @@
 let db = require('../utilities/utils').db;
 var request = require('request');
-function push_notification(tokens, msg) {
+function push_notification(tokens, msg, thesender) {
     let forwardedMsg = msg;
+    let sender = thesender;
     for (var i in tokens) {
         if (tokens[i].firebase_token != null) {
-            handleSingleToken(tokens[i].firebase_token, forwardedMsg);
+            handleSingleToken(tokens[i].firebase_token, forwardedMsg, sender);
         }
     }
 }
 
-function handleSingleToken(token, message) {
+function handleSingleToken(token, message, sender) {
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
@@ -17,7 +18,8 @@ function handleSingleToken(token, message) {
     let key3 = "notification";
     let value3 = {
         body : message,
-        title: "Red Armadillo"
+        title: sender,
+        icon : "ic_chat"
     };
 
     // Passing the argument token here
