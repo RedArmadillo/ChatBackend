@@ -31,10 +31,15 @@ function generateSecret() {
     return hash.substring(0, 32);
 }
 
+function generate6DigitsSecret() {
+    let random_bytes = crypto.randomBytes(32).toString("hex");
+    let hash = getHash(random_bytes);
+    return hash.substring(0, 6);
+}
 // base_url = "https://group7-chatapp.herokuapp.com/";
 base_url = process.env.BASE_URL;
 
 
 module.exports = {
- db, getHash, sendEmail, generateSecret, base_url
+ db, getHash, sendEmail, generateSecret, base_url, generate6DigitsSecret
 };

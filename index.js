@@ -39,6 +39,9 @@ app.use('/roomInvitation', invitation);
 
 let token = require('./routes/update_token.js');
 app.use('/updateToken', token);
+
+let resetPW = require('./routes/reset_password.js');
+app.use('/changePassword', resetPW);
 /**
  * Method to get a salted hash.
  * We put this in its own method to keep consistency
