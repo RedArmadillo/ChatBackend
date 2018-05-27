@@ -10,7 +10,7 @@ var router = express.Router();
 /*
 Accept a new friend request. Joy.
 */
-router.post('/:username_a/accept/', (req, res) => {
+router.post('/:username_a/accept', (req, res) => {
     let username_a = req.param("username_a");
     let username_b = req.body["username_b"];
 
@@ -152,17 +152,28 @@ router.post('/:username_a/request/', (req, res) => {
             }
 
             let params = [memberID_a, memberID_b];
-            db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
-            .then(()=>{
-                db.one("select firebase_token from Members where memberid = $1", memberID_b)
-                .then(row => {
-                    pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!", username_a, "connection");
-                    console.log("token of B: " + memberID_b);
+            // TODO Check if exists before insert
+            db.oneOrNone("SELECT MemberID_A, MemberID_B FROM Contacts WHERE (MemberID_A=$1 AND MemberID_B=$2) OR (MemberID_A=$2 AND MemberID_B=$1)", params)
+            .then((exists) => {
+                if (exists) {
                     res.send({
-                        success: true,
-                        message: "friend request sent"
+                        success: false,
+                        message: "pending request already exists between these members"
                     })
-                });
+                } else {
+                    db.none("INSERT INTO Contacts(MemberID_A, MemberID_B) VALUES ($1, $2)", params)
+                    .then(()=>{
+                        db.one("select firebase_token from Members where memberid = $1", memberID_b)
+                        .then(row => {
+                            pushNoti(row.firebase_token, "You have new connection request from " + username_a + "!", username_a, "connection");
+                            console.log("token of B: " + memberID_b);
+                            res.send({
+                                success: true,
+                                message: "friend request sent"
+                            })
+                        });
+                    });
+                }
             });
         })    
         .catch((err) => {
@@ -475,3 +486,21 @@ router.post('/:username_a/remove', (req, res) => {
 });
 
 module.exports = router;
+
+/*
+
+{
+    "success": true,
+    "data": [
+        "user1": {
+            "username": "hi"
+        },
+        "user2": {
+            "username": "testuser"
+        },
+    ] 
+}
+// at 0
+"user1": {
+    "username": "hi"
+}
