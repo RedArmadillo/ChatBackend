@@ -486,21 +486,3 @@ router.post('/:username_a/remove', (req, res) => {
 });
 
 module.exports = router;
-
-/*
-
-{
-    "success": true,
-    "data": [
-        "user1": {
-            "username": "hi"
-        },
-        "user2": {
-            "username": "testuser"
-        },
-    ] 
-}
-// at 0
-"user1": {
-    "username": "hi"
-}
