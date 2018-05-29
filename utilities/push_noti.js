@@ -2,35 +2,43 @@ let db = require('../utilities/utils').db;
 var request = require('request');
 
 
-function push_notification(rows, msg, thesender, thetag) {
+function push_notification(rows, msg, thesender, thetag, theid) {
     let forwardedMsg = msg;
     let sender = thesender;
     let tag = thetag;
+    let chatid = theid;
     for (var i in rows) {
         if (rows[i].firebase_token != null) {
-            handleSingleToken(rows[i].firebase_token, forwardedMsg, sender, tag);
+            handleSingleToken(rows[i].firebase_token, forwardedMsg, sender, tag, chatid);
         }
     }
 }
 
-function handleSingleToken(token, message, sender, thetag) {
+function handleSingleToken(token, message, sender, thetag, theid) {
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
     let value2 = "type_a";
     let key3 = "notification";
     let value3 = {
+        click_action : "OPEN_ACTIVITY",
         body : message,
         title: sender,
         icon : "ic_chat",
         tag : thetag,
         sound: "default"
     };
+    let key4 = "data";
+    let value4 = {
+        chatid : theid,
+        roomname: thetag
+    };
 
     // Passing the argument token here
     fullBody[key1] = token;
     fullBody[key2] = value2;
     fullBody[key3] = value3;
+    fullBody[key4] = value4;
     
     // The options of POST request 
     let options = {
@@ -50,18 +58,19 @@ function handleSingleToken(token, message, sender, thetag) {
     });
 }
 
-function push_notification_topic(rows, msg, thesender, thetag) {
+function push_notification_topic(rows, msg, thesender, thetag, theid) {
     let forwardedMsg = msg;
     let sender = thesender;
     let tag = thetag;
+    let id =  theid;
     for (var i in rows) {
         if (rows[i].username != null) {
-            handleSingleTopic(rows[i].username, forwardedMsg, sender, tag);
+            handleSingleTopic(rows[i].username, forwardedMsg, sender, tag, id);
         }
     }
 }
 
-function handleSingleTopic(topic, message, sender, thetag) {
+function handleSingleTopic(topic, message, sender, thetag, theid) {
     let fullBody = new Object();
     let key1 = "to";
     let key2 = "collapse_key";
@@ -74,11 +83,16 @@ function handleSingleTopic(topic, message, sender, thetag) {
         tag : thetag,
         sound: "default"
     };
+    let key4 = "data";
+    let value4 = {
+        chatid : theid
+    };
 
     // Passing the argument token here
     fullBody[key1] = topic;
     fullBody[key2] = value2;
     fullBody[key3] = value3;
+    fullBody[key4] = value4;
     
     // The options of POST request 
     let options = {
