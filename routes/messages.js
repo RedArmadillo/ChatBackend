@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 let db = require('../utilities/utils').db;
 let pushNoti = require('../utilities/push_noti.js').push_notification;
+let pushNotiTopic = require('../utilities/push_noti.js').push_notification_topic;
 var router = express.Router();
 var request = require('request');
 
@@ -24,14 +25,16 @@ router.post("/sendMessages", (req, res) => {
     .then(() => {
         // change the callback such that it will push notification to other users
         // after message is sent
-        let getUserToken = `select firebase_token
+        // We need all the users of the chat room
+        let getUserToken = `select *
                     from members m left join chatmembers c
                         on m.memberid = c.memberid
                         where c.chatid = $1 and m.username != $2`;
         db.manyOrNone(getUserToken, [chatId, username])
         .then((rows)=> {
             // Pushing notification after message sent
-            pushNoti(rows, message, username, roomName);
+            //pushNoti(rows, message, username, roomName);
+            pushNotiTopic(rows, message, username, roomName);
             res.send({
                 success: true,
                 message : "notification sent"
