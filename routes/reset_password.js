@@ -12,7 +12,7 @@ const crypto = require("crypto");
 let generateToken = require('../utilities/utils').generate6DigitsSecret;
 let sendToken = require('../utilities/send_reset_password_token');
 
-
+// This service will be called when users want to change password
 router.post('/', (req, res) => {
     res.type("application/json");
     //Retrieve data from query params
