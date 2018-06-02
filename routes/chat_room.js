@@ -10,7 +10,9 @@ router.use(bodyParser.json());
 let temp;
 var id;
 
-// Service to get all the chat rooms a user are in
+/**
+ * Service to get all the chat rooms a user are in
+ */
 router.get("/", (req, res) => {
     let name = req.query['username'];
  
@@ -42,7 +44,9 @@ router.get("/", (req, res) => {
 });
 
 
-// Service to create a new chat room
+/**
+ *  Service to create a new chat room
+*/
 router.post("/", (req, res) => {
     let name = req.body['room name'];
     let uname = req.body['username'];
@@ -82,7 +86,9 @@ router.post("/", (req, res) => {
     }); 
 });
 
-// service to leave a room
+/**
+ *  service to leave a room
+*/
 router.post('/leave', (req, res) =>{
     let userid = req.body['memberid'];
     let roomid = req.body['chatid'];

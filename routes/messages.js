@@ -6,6 +6,9 @@ let pushNotiTopic = require('../utilities/push_noti.js').push_notification_topic
 var router = express.Router();
 var request = require('request');
 
+/**
+ * Sends a message to the provided chatroom
+ */
 router.post("/sendMessages", (req, res) => {
     let username = req.body['username'];
     let message = req.body['message'];
@@ -55,6 +58,9 @@ router.post("/sendMessages", (req, res) => {
     });
 });
 
+/**
+ * Gets messages for the provided chatroom
+ */
 router.get("/getMessages", (req, res) => {
     let chatId = req.query['chatId'];
     let after = req.query['after'];

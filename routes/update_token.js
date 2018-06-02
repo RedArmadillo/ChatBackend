@@ -7,6 +7,9 @@ var router = express.Router();
 
 router.use(bodyParser.json());
 
+/**
+ * sets a member's firebase token
+ */
 router.post('/', (req, res) => {
     let u_name = req.body['username'];
     let token = req.body['token'];

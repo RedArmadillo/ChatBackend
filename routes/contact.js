@@ -8,7 +8,7 @@ let pushNoti = require('../utilities/push_noti.js').handleSingleToken;
 var router = express.Router();
 
 /*
-Accept a new friend request. Joy.
+Accept a new friend request. Joy!
 */
 router.post('/:username_a/accept', (req, res) => {
     let username_a = req.param("username_a");

@@ -2,6 +2,14 @@ let db = require('../utilities/utils').db;
 var request = require('request');
 
 
+/**
+ * Sends a push notification
+ * @param {*} rows 
+ * @param {*} msg 
+ * @param {*} thesender 
+ * @param {*} thetag 
+ * @param {*} theid 
+ */
 function push_notification(rows, msg, thesender, thetag, theid) {
     let forwardedMsg = msg;
     let sender = thesender;
@@ -14,6 +22,15 @@ function push_notification(rows, msg, thesender, thetag, theid) {
     }
 }
 
+
+/**
+ * Handles push notification token
+ * @param {*} token 
+ * @param {*} message 
+ * @param {*} sender 
+ * @param {*} thetag 
+ * @param {*} theid 
+ */
 function handleSingleToken(token, message, sender, thetag, theid) {
     let fullBody = new Object();
     let key1 = "to";
@@ -58,6 +75,15 @@ function handleSingleToken(token, message, sender, thetag, theid) {
     });
 }
 
+
+/**
+ * Handles push notification topics
+ * @param {*} rows 
+ * @param {*} msg 
+ * @param {*} thesender 
+ * @param {*} thetag 
+ * @param {*} theid 
+ */
 function push_notification_topic(rows, msg, thesender, thetag, theid) {
     let forwardedMsg = msg;
     let sender = thesender;
@@ -70,6 +96,15 @@ function push_notification_topic(rows, msg, thesender, thetag, theid) {
     }
 }
 
+
+/**
+ * Handles a single push notification topic
+ * @param {*} topic 
+ * @param {*} message 
+ * @param {*} sender 
+ * @param {*} thetag 
+ * @param {*} theid 
+ */
 function handleSingleTopic(topic, message, sender, thetag, theid) {
     let fullBody = new Object();
     let key1 = "to";
@@ -100,6 +135,7 @@ function handleSingleTopic(topic, message, sender, thetag, theid) {
         method: 'POST',
         body: JSON.stringify(fullBody),
         headers: {
+            // this is bad practice, but for some reason a config var on the server with exactly the same text wouldn't work
         'Authorization' : 'key=AAAABwN1kqU:APA91bG8YPbMWrNfuZVIRyB1Wuy93gaTYiERpwKWydlnSBqBfhlWznL03RCDCOXVbXdAANqg9H0DY7Mxc9ZtHKRbx3WpaTJegacCsm_j7EhWaKTJl1khyLu9tF5-Kw_Xc6b34SY6ROtt',
         // 'Authorization' : process.env.FIREBASE_SERVER_KEY,
         'Content-Type' : 'application/json',
@@ -111,7 +147,6 @@ function handleSingleTopic(topic, message, sender, thetag, theid) {
         console.log('body:', body)
     });
 }
-
 
 
 module.exports = {push_notification, handleSingleToken, push_notification_topic, handleSingleTopic};

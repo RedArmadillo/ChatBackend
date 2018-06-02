@@ -2,6 +2,13 @@ let nodemailer = require("nodemailer");
 let db = require('../utilities/utils').db;
 let base_url = require('../utilities/utils').base_url;
 
+
+/**
+ * Sends a verification email with a secret to return for account validation
+ * @param {*} username 
+ * @param {*} email 
+ * @param {*} secret 
+ */
 function verify_account (username, email, secret) {
 
     verify_params = [email, secret];

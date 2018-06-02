@@ -6,6 +6,9 @@ let db = require('../utilities/utils').db;
 let sendVerification = require('../utilities/send_verification');
 let generateSecret = require('../utilities/utils').generateSecret;
 
+/**
+ * resets a verification secret and resends a verification email with a new secret
+ */
 router.put('/', (req, res) => {
     res.type("application/json");
 
